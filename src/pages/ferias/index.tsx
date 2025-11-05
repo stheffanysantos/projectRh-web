@@ -11,7 +11,6 @@ export default function FeriasPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Ferias | null>(null);
 
-  // 🔄 Carrega todas as férias
   async function carregar() {
     try {
       const res = await fetch("http://localhost:8080/ferias");
@@ -72,7 +71,7 @@ export default function FeriasPage() {
           </DialogHeader>
 
           <FeriasForm
-            initialData={editing || undefined}
+            initialData={editing ?? undefined}
             onClose={() => setModalOpen(false)}
             onSuccess={() => {
               setModalOpen(false);
