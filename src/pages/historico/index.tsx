@@ -18,7 +18,7 @@ export default function HistoricoPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8080/historico")
+    fetch("https://projectrh-server.onrender.com/historico")
       .then((res) => res.json())
       .then((data) => {
         const formatted = data.map((item: any) => ({

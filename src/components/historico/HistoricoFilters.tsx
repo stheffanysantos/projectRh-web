@@ -16,7 +16,7 @@ export function HistoricoFilters({
   const [funcionarios, setFuncionarios] = useState<{ id: string; nome: string }[]>([]);
 
   useEffect(() => {
-    fetch("http://localhost:8080/funcionarios")
+    fetch("https://projectrh-server.onrender.com/funcionarios")
       .then((res) => res.json())
       .then((data) => setFuncionarios(data))
       .catch((err) => console.error("Erro ao buscar funcionários:", err));

@@ -24,7 +24,7 @@ export default function FeriasForm({ initialData, onClose, onSuccess }: FeriasFo
   });
 
   useEffect(() => {
-    fetch("http://localhost:8080/funcionarios")
+    fetch("https://projectrh-server.onrender.com/funcionarios")
       .then(res => res.json())
       .then(data => setFuncionarios(data))
       .catch(() => toast.error("Erro ao carregar funcionários"));
@@ -42,8 +42,8 @@ export default function FeriasForm({ initialData, onClose, onSuccess }: FeriasFo
     try {
       const method = form.id ? "PUT" : "POST";
       const url = form.id
-        ? `http://localhost:8080/ferias/${form.id}`
-        : "http://localhost:8080/ferias";
+        ? `https://projectrh-server.onrender.com/ferias/${form.id}`
+        : "https://projectrh-server.onrender.com/ferias";
 
       const resp = await fetch(url, {
         method,

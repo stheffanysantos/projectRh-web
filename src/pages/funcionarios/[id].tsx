@@ -18,7 +18,7 @@ export default function PerfilFuncionarioPage() {
 
   useEffect(() => {
     if (id) {
-      fetch(`http://localhost:8080/funcionarios/${id}`)
+      fetch(`https://projectrh-server.onrender.com/funcionarios/${id}`)
         .then(res => res.json())
         .then(setFuncionario);
     }
@@ -46,13 +46,13 @@ export default function PerfilFuncionarioPage() {
           <FuncionarioForm
             initialData={funcionario}
             onSubmit={async (dados) => {
-              await fetch(`http://localhost:8080/funcionarios/${funcionario.id}`, {
+              await fetch(`https://projectrh-server.onrender.com/funcionarios/${funcionario.id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(dados),
               });
               setEditando(false);
-              fetch(`http://localhost:8080/funcionarios/${funcionario.id}`)
+              fetch(`https://projectrh-server.onrender.com/funcionarios/${funcionario.id}`)
                 .then(res => res.json())
                 .then(setFuncionario);
             }}

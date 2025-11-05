@@ -21,13 +21,13 @@ export default function FuncionariosPage() {
   const router = useRouter();
 
   useEffect(() => {
-    fetch("http://localhost:8080/funcionarios")
+    fetch("https://projectrh-server.onrender.com/funcionarios")
       .then(res => res.json())
       .then(setFuncionarios);
   }, []);
 
   const handleSubmit = async (data:any) => {
-    const response = await fetch("http://localhost:8080/funcionarios", {
+    const response = await fetch("https://projectrh-server.onrender.com/funcionarios", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
@@ -35,7 +35,7 @@ export default function FuncionariosPage() {
     if (response.ok) {
       setOpen(false);
       // Atualiza a lista
-      const novaLista = await fetch("http://localhost:8080/funcionarios").then(res => res.json());
+      const novaLista = await fetch("https://projectrh-server.onrender.com/funcionarios").then(res => res.json());
       setFuncionarios(novaLista);
     } else {
       alert("Erro ao cadastrar funcionário");

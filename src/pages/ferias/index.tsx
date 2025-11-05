@@ -13,7 +13,7 @@ export default function FeriasPage() {
 
   async function carregar() {
     try {
-      const res = await fetch("http://localhost:8080/ferias");
+      const res = await fetch("https://projectrh-server.onrender.com/ferias");
       if (!res.ok) throw new Error("Erro ao buscar férias");
       const data = await res.json();
       setFerias(data);
@@ -31,7 +31,7 @@ export default function FeriasPage() {
     if (!confirm("Deseja realmente excluir esta férias?")) return;
 
     try {
-      const res = await fetch(`http://localhost:8080/ferias/${id}`, { method: "DELETE" });
+      const res = await fetch(`https://projectrh-server.onrender.com/ferias/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Erro ao excluir férias");
       toast.success("Férias excluída com sucesso!");
       carregar();
