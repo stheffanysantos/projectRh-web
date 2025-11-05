@@ -1,3 +1,4 @@
+
 export interface Ferias {
   id?: string;
   funcionarioId: string;
