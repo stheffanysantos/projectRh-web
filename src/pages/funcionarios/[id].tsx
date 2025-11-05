@@ -18,7 +18,7 @@ export default function PerfilFuncionarioPage() {
 
   useEffect(() => {
     if (id) {
-      fetch(`https://projectrh-server.onrender.com/funcionarios/${id}`)
+      fetch(`https://stheffany-backend.df8lqa.easypanel.host/funcionarios/${id}`)
         .then(res => res.json())
         .then(setFuncionario);
     }
@@ -46,13 +46,13 @@ export default function PerfilFuncionarioPage() {
           <FuncionarioForm
             initialData={funcionario}
             onSubmit={async (dados) => {
-              await fetch(`https://projectrh-server.onrender.com/funcionarios/${funcionario.id}`, {
+              await fetch(`https://stheffany-backend.df8lqa.easypanel.host/funcionarios/${funcionario.id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(dados),
               });
               setEditando(false);
-              fetch(`https://projectrh-server.onrender.com/funcionarios/${funcionario.id}`)
+              fetch(`https://stheffany-backend.df8lqa.easypanel.host/funcionarios/${funcionario.id}`)
                 .then(res => res.json())
                 .then(setFuncionario);
             }}

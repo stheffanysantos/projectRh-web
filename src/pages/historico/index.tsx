@@ -18,7 +18,7 @@ export default function HistoricoPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("https://projectrh-server.onrender.com/historico")
+    fetch("https://stheffany-backend.df8lqa.easypanel.host/historico")
       .then((res) => res.json())
       .then((data) => {
         const formatted = data.map((item: any) => ({

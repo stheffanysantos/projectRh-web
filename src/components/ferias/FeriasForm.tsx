@@ -24,7 +24,7 @@ export default function FeriasForm({ initialData, onClose, onSuccess }: FeriasFo
   });
 
   useEffect(() => {
-    fetch("https://projectrh-server.onrender.com/funcionarios")
+    fetch("https://stheffany-backend.df8lqa.easypanel.host/funcionarios")
       .then(res => res.json())
       .then(data => setFuncionarios(data))
       .catch(() => toast.error("Erro ao carregar funcionários"));
@@ -42,8 +42,8 @@ export default function FeriasForm({ initialData, onClose, onSuccess }: FeriasFo
     try {
       const method = form.id ? "PUT" : "POST";
       const url = form.id
-        ? `https://projectrh-server.onrender.com/ferias/${form.id}`
-        : "https://projectrh-server.onrender.com/ferias";
+        ? `https://stheffany-backend.df8lqa.easypanel.host/ferias/${form.id}`
+        : "https://stheffany-backend.df8lqa.easypanel.host/ferias";
 
       const resp = await fetch(url, {
         method,
