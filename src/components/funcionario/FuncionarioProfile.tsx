@@ -35,7 +35,7 @@ export default function FuncionarioProfile({
         <CardContent>
           <div className="flex items-center gap-6 mb-8">
             <img
-              src={funcionario.avatarUrl || "/default-avatar.png"}
+              src={funcionario.avatarUrl || "https://avatars.githubusercontent.com/u/131394528?v=4"}
               alt={funcionario.nome}
               className="rounded-full w-20 h-20 object-cover"
             />
@@ -71,9 +71,6 @@ export default function FuncionarioProfile({
             <div className="font-semibold mb-2">Ações</div>
             <Button variant="outline" className="mr-2" onClick={onControleFerias}>
               Controle de férias
-            </Button>
-            <Button variant="outline" onClick={onHistoricoSalarial}>
-              Ver histórico salarial
             </Button>
           </div>
         </CardContent>

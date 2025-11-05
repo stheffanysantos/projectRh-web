@@ -1,86 +1,148 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 type Ferias = {
-  funcionario: string;
+  id?: string;
+  funcionarioId: string;
+  funcionarioNome: string;
   dataInicio: string;
   dataFim: string;
   status: string;
 };
 
-interface FeriasFormProps {
+type FeriasFormProps = {
+  initialData?: Ferias;
   onClose: () => void;
   onSuccess: (ferias: Ferias) => void;
-}
+};
 
-export default function FeriasForm({ onClose, onSuccess }: FeriasFormProps) {
-  const [form, setForm] = useState<Ferias>({
-    funcionario: "",
-    dataInicio: "",
-    dataFim: "",
-    status: "Pendente",
-  });
+export default function FeriasForm({ initialData, onClose, onSuccess }: FeriasFormProps) {
   const [loading, setLoading] = useState(false);
+  const [funcionarios, setFuncionarios] = useState<{ id: string; nome: string }[]>([]);
+  const [form, setForm] = useState<Ferias>({
+    id: initialData?.id,
+    funcionarioId: initialData?.funcionarioId || "",
+    funcionarioNome: initialData?.funcionarioNome || "",
+    dataInicio: initialData?.dataInicio || "",
+    dataFim: initialData?.dataFim || "",
+    status: initialData?.status || "Solicitado",
+  });
+
+  useEffect(() => {
+    fetch("http://localhost:8080/funcionarios")
+      .then(res => res.json())
+      .then(data => setFuncionarios(data))
+      .catch(() => toast.error("Erro ao carregar funcionários"));
+  }, []);
+
+  function handleFuncionarioChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const [id, nome] = e.target.value.split("|");
+    setForm(f => ({ ...f, funcionarioId: id, funcionarioNome: nome }));
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    const resp = await fetch("http://localhost:8080/ferias", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    setLoading(false);
-    if (resp.ok) {
-      onSuccess(form);
-    } else {
-      alert("Erro ao salvar férias");
+
+    try {
+      const method = form.id ? "PUT" : "POST";
+      const url = form.id
+        ? `http://localhost:8080/ferias/${form.id}`
+        : "http://localhost:8080/ferias";
+
+      const resp = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      if (!resp.ok) throw new Error("Erro ao salvar férias");
+
+      const data = await resp.json();
+      toast.success("Férias salvas com sucesso!");
+      onSuccess(data);
+    } catch (err) {
+      toast.error("Falha ao salvar férias");
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
-    <div className="fixed inset-0 flex justify-center items-center bg-black/30 z-50">
-      <Card className="w-full max-w-md">
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
-            <Input
-              placeholder="Funcionário"
-              value={form.funcionario}
-              onChange={e => setForm(f => ({ ...f, funcionario: e.target.value }))}
-              required
-            />
-            <Input
-              placeholder="Data início"
-              type="date"
-              value={form.dataInicio}
-              onChange={e => setForm(f => ({ ...f, dataInicio: e.target.value }))}
-              required
-            />
-            <Input
-              placeholder="Data fim"
-              type="date"
-              value={form.dataFim}
-              onChange={e => setForm(f => ({ ...f, dataFim: e.target.value }))}
-              required
-            />
-            <select
-              className="w-full border rounded p-2"
-              value={form.status}
-              onChange={e => setForm(f => ({ ...f, status: e.target.value }))}
-            >
-              <option value="Pendente">Pendente</option>
-              <option value="Em andamento">Em andamento</option>
-              <option value="Concluída">Concluída</option>
-            </select>
-          </CardContent>
-          <CardFooter className="flex justify-between">
-            <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
-            <Button type="submit" disabled={loading}>{loading ? "Salvando..." : "Salvar"}</Button>
-          </CardFooter>
-        </form>
-      </Card>
-    </div>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="block mb-1 text-sm font-medium">Funcionário</label>
+        <select
+          value={
+            form.funcionarioId && form.funcionarioNome
+              ? `${form.funcionarioId}|${form.funcionarioNome}`
+              : ""
+          }
+          onChange={handleFuncionarioChange}
+          required
+          className="w-full rounded-md border p-2"
+        >
+          <option value="">Selecione</option>
+          {funcionarios.map(f => (
+            <option key={f.id} value={`${f.id}|${f.nome}`}>
+              {f.nome}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block mb-1 text-sm font-medium">Data de início</label>
+          <Input
+            type="date"
+            value={form.dataInicio}
+            onChange={e => setForm(f => ({ ...f, dataInicio: e.target.value }))}
+            required
+          />
+        </div>
+        <div>
+          <label className="block mb-1 text-sm font-medium">Data de fim</label>
+          <Input
+            type="date"
+            value={form.dataFim}
+            onChange={e => setForm(f => ({ ...f, dataFim: e.target.value }))}
+            required
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className="block mb-1 text-sm font-medium">Status</label>
+        <select
+          value={form.status}
+          onChange={e => setForm(f => ({ ...f, status: e.target.value }))}
+          className="w-full rounded-md border p-2"
+        >
+          <option value="Solicitado">Solicitado</option>
+          <option value="Aprovado">Aprovado</option>
+          <option value="Recusado">Recusado</option>
+          <option value="Concluído">Concluído</option>
+        </select>
+      </div>
+
+      <div className="flex justify-end gap-2 pt-2">
+        <Button type="button" variant="outline" onClick={onClose}>
+          Cancelar
+        </Button>
+        <Button type="submit" disabled={loading}>
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Salvando...
+            </>
+          ) : (
+            "Salvar"
+          )}
+        </Button>
+      </div>
+    </form>
   );
 }

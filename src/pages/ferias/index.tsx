@@ -1,61 +1,94 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import FeriasTable from "@/components/ferias/FeriasTable";
-import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import FeriasForm from "@/components/ferias/FeriasForm";
+import FeriasTable from "@/components/ferias/FeriasTable";
+import { toast } from "sonner";
 
 type Ferias = {
-  funcionario: string;
+  id?: string;
+  funcionarioId?: string;
+  funcionarioNome: string;
   dataInicio: string;
   dataFim: string;
   status: string;
 };
 
 export default function FeriasPage() {
-  const [search, setSearch] = useState("");
   const [ferias, setFerias] = useState<Ferias[]>([]);
-  const [showForm, setShowForm] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState<Ferias | null>(null);
+
+  // 🔄 Carrega todas as férias
+  async function carregar() {
+    try {
+      const res = await fetch("http://localhost:8080/ferias");
+      if (!res.ok) throw new Error("Erro ao buscar férias");
+      const data = await res.json();
+      setFerias(data);
+    } catch (error) {
+      console.error(error);
+      toast.error("Falha ao carregar férias");
+    }
+  }
 
   useEffect(() => {
-    fetch("http://localhost:8080/ferias")
-      .then((res) => res.json())
-      .then(setFerias);
+    carregar();
   }, []);
 
-  const filtradas = ferias.filter(
-    (f) =>
-      !search ||
-      f.funcionario.toLowerCase().includes(search.toLowerCase())
-  );
+  async function handleDelete(id: string) {
+    if (!confirm("Deseja realmente excluir esta férias?")) return;
+
+    try {
+      const res = await fetch(`http://localhost:8080/ferias/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Erro ao excluir férias");
+      toast.success("Férias excluída com sucesso!");
+      carregar();
+    } catch (error) {
+      console.error(error);
+      toast.error("Falha ao excluir férias");
+    }
+  }
 
   return (
-    <div className="max-w-4xl mx-auto mt-10">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Gestão de férias</h1>
-        <Button variant="outline" onClick={() => setShowForm(true)}>
-          Adicionar féria..
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-semibold">Gestão de Férias</h1>
+        <Button
+          onClick={() => {
+            setEditing(null);
+            setModalOpen(true);
+          }}
+        >
+          + Nova Férias
         </Button>
       </div>
-      <Input
-        className="mb-4"
-        placeholder="Search by employee or status"
-        value={search}
-        onChange={e => setSearch(e.target.value)}
-      />
+
       <FeriasTable
-        ferias={filtradas}
-        onEdit={idx => alert("Editar férias")}
-        onDelete={idx => alert("Deletar férias")}
+        ferias={ferias}
+        onEdit={(f) => {
+          setEditing(f);
+          setModalOpen(true);
+        }}
+        onDelete={handleDelete}
       />
-      {showForm && (
-        <FeriasForm
-          onClose={() => setShowForm(false)}
-          onSuccess={(novaFeria) => {
-            setFerias(arr => [...arr, novaFeria]);
-            setShowForm(false);
-          }}
-        />
-      )}
+
+      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{editing ? "Editar Férias" : "Nova Férias"}</DialogTitle>
+          </DialogHeader>
+
+          <FeriasForm
+            initialData={editing || undefined}
+            onClose={() => setModalOpen(false)}
+            onSuccess={() => {
+              setModalOpen(false);
+              carregar();
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

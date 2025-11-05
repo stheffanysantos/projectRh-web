@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableCell, TableHead, TableHeader, TableRow, TableBody } from "@/components/ui/table";
-import { useRouter } from 'next/router';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import FuncionarioForm from "@/components/funcionario/FuncionarioForm";
+import { useRouter } from "next/router";
 
 export interface Funcionario {
   id: string;
@@ -9,27 +11,54 @@ export interface Funcionario {
   email: string;
   cargo: string;
   departamento: string;
-  // adicione campos conforme model/backend
   status?: string;
   dataContratacao?: string;
 }
 
 export default function FuncionariosPage() {
   const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
+  const [open, setOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    fetch('http://localhost:8080/funcionarios')
+    fetch("http://localhost:8080/funcionarios")
       .then(res => res.json())
       .then(setFuncionarios);
   }, []);
 
+  const handleSubmit = async (data:any) => {
+    const response = await fetch("http://localhost:8080/funcionarios", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    if (response.ok) {
+      setOpen(false);
+      // Atualiza a lista
+      const novaLista = await fetch("http://localhost:8080/funcionarios").then(res => res.json());
+      setFuncionarios(novaLista);
+    } else {
+      alert("Erro ao cadastrar funcionário");
+    }
+  };
+
   return (
-    <div>
+    <div className="max-w-4xl mx-auto mt-10">
       <h1 className="text-2xl font-bold mb-4">Funcionários</h1>
-      <Button className="mb-4" onClick={() => router.push('/funcionarios/novo')}>
-        Novo Funcionário
-      </Button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button className="mb-4">Novo Funcionário</Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cadastro de Funcionário</DialogTitle>
+          </DialogHeader>
+          <FuncionarioForm
+            onSubmit={handleSubmit}
+            onCancel={() => setOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
       <Table>
         <TableHeader>
           <TableRow>
@@ -57,5 +86,5 @@ export default function FuncionariosPage() {
         </TableBody>
       </Table>
     </div>
-  )
+  );
 }
