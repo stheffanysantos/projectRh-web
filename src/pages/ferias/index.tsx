@@ -4,15 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import FeriasForm from "@/components/ferias/FeriasForm";
 import FeriasTable from "@/components/ferias/FeriasTable";
 import { toast } from "sonner";
-
-type Ferias = {
-  id?: string;
-  funcionarioId?: string;
-  funcionarioNome: string;
-  dataInicio: string;
-  dataFim: string;
-  status: string;
-};
+import { Ferias } from "@/types/Ferias";
 
 export default function FeriasPage() {
   const [ferias, setFerias] = useState<Ferias[]>([]);

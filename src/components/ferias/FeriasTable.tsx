@@ -1,13 +1,7 @@
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Ferias } from "@/types/Ferias";
 
-type Ferias = {
-  id?: string;
-  funcionarioNome: string;
-  dataInicio: string;
-  dataFim: string;
-  status: string;
-};
 
 interface FeriasTableProps {
   ferias: Ferias[];

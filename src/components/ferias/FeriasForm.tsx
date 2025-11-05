@@ -3,15 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-
-type Ferias = {
-  id?: string;
-  funcionarioId: string;
-  funcionarioNome: string;
-  dataInicio: string;
-  dataFim: string;
-  status: string;
-};
+import { Ferias } from "@/types/Ferias";
 
 type FeriasFormProps = {
   initialData?: Ferias;
