@@ -25,14 +25,51 @@ export default function FuncionarioForm({
     salario: initialData?.salario ?? "",
   });
 
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  const validate = () => {
+    const newErrors: { [key: string]: string } = {};
+
+    if (!form.nome.trim()) newErrors.nome = "O nome é obrigatório.";
+    if (!form.cargo.trim()) newErrors.cargo = "O cargo é obrigatório.";
+    if (!form.departamento.trim())
+      newErrors.departamento = "O departamento é obrigatório.";
+
+    // Validação de email
+    if (!/\S+@\S+\.\S+/.test(form.email))
+      newErrors.email = "Digite um email válido.";
+
+    // Validação de telefone (apenas números)
+    if (form.telefone && !/^\d{9,11}$/.test(form.telefone))
+      newErrors.telefone = "O telefone deve conter apenas números (9 a 11 dígitos).";
+
+    // Validação de salário
+    if (form.salario && Number(form.salario) < 0)
+      newErrors.salario = "O salário deve ser um valor positivo.";
+
+    // Validação de data (não pode ser no futuro)
+    if (form.dataContratacao) {
+      const hoje = new Date();
+      const data = new Date(form.dataContratacao);
+      if (data > hoje)
+        newErrors.dataContratacao = "A data de contratação não pode ser no futuro.";
+    } else {
+      newErrors.dataContratacao = "A data de contratação é obrigatória.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validate()) return;
+    onSubmit(form);
+  };
+
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        onSubmit(form);
-      }}
-      className="space-y-4"
-    >
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Nome */}
       <div>
         <label className="block text-sm font-medium mb-1">Nome completo</label>
         <Input
@@ -40,9 +77,11 @@ export default function FuncionarioForm({
           placeholder="Nome completo"
           value={form.nome}
           onChange={(e) => setForm({ ...form, nome: e.target.value })}
-          required
         />
+        {errors.nome && <p className="text-red-500 text-sm mt-1">{errors.nome}</p>}
       </div>
+
+      {/* Cargo */}
       <div>
         <label className="block text-sm font-medium mb-1">Cargo</label>
         <Input
@@ -50,9 +89,11 @@ export default function FuncionarioForm({
           placeholder="Cargo"
           value={form.cargo}
           onChange={(e) => setForm({ ...form, cargo: e.target.value })}
-          required
         />
+        {errors.cargo && <p className="text-red-500 text-sm mt-1">{errors.cargo}</p>}
       </div>
+
+      {/* Departamento */}
       <div>
         <label className="block text-sm font-medium mb-1">Departamento</label>
         <Input
@@ -60,9 +101,13 @@ export default function FuncionarioForm({
           placeholder="Departamento"
           value={form.departamento}
           onChange={(e) => setForm({ ...form, departamento: e.target.value })}
-          required
         />
+        {errors.departamento && (
+          <p className="text-red-500 text-sm mt-1">{errors.departamento}</p>
+        )}
       </div>
+
+      {/* Email */}
       <div>
         <label className="block text-sm font-medium mb-1">Email</label>
         <Input
@@ -71,28 +116,39 @@ export default function FuncionarioForm({
           placeholder="Email"
           value={form.email}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
-          required
         />
+        {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
       </div>
+
+      {/* Telefone */}
       <div>
         <label className="block text-sm font-medium mb-1">Telefone</label>
         <Input
           name="telefone"
-          placeholder="Telefone"
+          placeholder="Somente números"
           value={form.telefone}
-          onChange={(e) => setForm({ ...form, telefone: e.target.value })}
+          onChange={(e) =>
+            setForm({ ...form, telefone: e.target.value.replace(/\D/g, "") })
+          }
         />
+        {errors.telefone && (
+          <p className="text-red-500 text-sm mt-1">{errors.telefone}</p>
+        )}
       </div>
+
+      {/* Avatar */}
       <div>
         <label className="block text-sm font-medium mb-1">Avatar URL</label>
         <Input
           name="avatarUrl"
           type="url"
-          placeholder="Ex: https://github.com/stheffanysantos.png"
+          placeholder="https://github.com/stheffanysantos.png"
           value={form.avatarUrl}
           onChange={(e) => setForm({ ...form, avatarUrl: e.target.value })}
         />
       </div>
+
+      {/* Salário */}
       <div>
         <label className="block text-sm font-medium mb-1">Salário</label>
         <Input
@@ -102,7 +158,12 @@ export default function FuncionarioForm({
           value={form.salario}
           onChange={(e) => setForm({ ...form, salario: e.target.value })}
         />
+        {errors.salario && (
+          <p className="text-red-500 text-sm mt-1">{errors.salario}</p>
+        )}
       </div>
+
+      {/* Data */}
       <div>
         <label className="block text-sm font-medium mb-1">Data de contratação</label>
         <Input
@@ -110,9 +171,13 @@ export default function FuncionarioForm({
           type="date"
           value={form.dataContratacao}
           onChange={(e) => setForm({ ...form, dataContratacao: e.target.value })}
-          required
         />
+        {errors.dataContratacao && (
+          <p className="text-red-500 text-sm mt-1">{errors.dataContratacao}</p>
+        )}
       </div>
+
+      {/* Status */}
       <div>
         <label className="block text-sm font-medium mb-1">Status</label>
         <div className="flex gap-2">
@@ -132,6 +197,8 @@ export default function FuncionarioForm({
           </Button>
         </div>
       </div>
+
+      {/* Botões */}
       <div className="flex justify-end gap-2 mt-4">
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancelar

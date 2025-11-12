@@ -4,6 +4,7 @@ import { Table, TableCell, TableHead, TableHeader, TableRow, TableBody } from "@
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import FuncionarioForm from "@/components/funcionario/FuncionarioForm";
 import { useRouter } from "next/router";
+import { toast } from "sonner";
 
 export interface Funcionario {
   id: string;
@@ -17,48 +18,51 @@ export interface Funcionario {
 
 export default function FuncionariosPage() {
   const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
-  const [open, setOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const router = useRouter();
 
+  async function carregar() {
+    try {
+      const res = await fetch("https://stheffany-backend.df8lqa.easypanel.host/funcionarios");
+      if (!res.ok) throw new Error("Erro ao buscar funcionários");
+      const data = await res.json();
+      setFuncionarios(data);
+    } catch (error) {
+      console.error(error);
+      toast.error("Falha ao carregar funcionários");
+    }
+  }
+
   useEffect(() => {
-    fetch("https://stheffany-backend.df8lqa.easypanel.host/funcionarios")
-      .then(res => res.json())
-      .then(setFuncionarios);
+    carregar();
   }, []);
 
-  const handleSubmit = async (data:any) => {
-    const response = await fetch("https://stheffany-backend.df8lqa.easypanel.host/funcionarios", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-    if (response.ok) {
-      setOpen(false);
-      // Atualiza a lista
-      const novaLista = await fetch("https://stheffany-backend.df8lqa.easypanel.host/funcionarios").then(res => res.json());
-      setFuncionarios(novaLista);
-    } else {
-      alert("Erro ao cadastrar funcionário");
+  const handleSubmit = async (data: any) => {
+    try {
+      const response = await fetch("https://stheffany-backend.df8lqa.easypanel.host/funcionarios", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) throw new Error("Erro ao cadastrar funcionário");
+
+      toast.success("Funcionário cadastrado com sucesso!");
+      setModalOpen(false);
+      carregar();
+    } catch (error) {
+      console.error(error);
+      toast.error("Falha ao cadastrar funcionário");
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto mt-10">
-      <h1 className="text-2xl font-bold mb-4">Funcionários</h1>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button className="mb-4">Novo Funcionário</Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Cadastro de Funcionário</DialogTitle>
-          </DialogHeader>
-          <FuncionarioForm
-            onSubmit={handleSubmit}
-            onCancel={() => setOpen(false)}
-          />
-        </DialogContent>
-      </Dialog>
+    <div className="p-6 min-h-screen bg-background">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-semibold">Gestão de Funcionários</h1>
+        <Button onClick={() => setModalOpen(true)}>+ Novo Funcionário</Button>
+      </div>
+
       <Table>
         <TableHeader>
           <TableRow>
@@ -71,7 +75,7 @@ export default function FuncionariosPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {funcionarios.map(f => (
+          {funcionarios.map((f) => (
             <TableRow key={f.id}>
               <TableCell>{f.nome}</TableCell>
               <TableCell>{f.email}</TableCell>
@@ -79,12 +83,31 @@ export default function FuncionariosPage() {
               <TableCell>{f.departamento}</TableCell>
               <TableCell>{f.status ?? "Ativo"}</TableCell>
               <TableCell>
-                <Button onClick={() => router.push(`/funcionarios/${f.id}`)}>Visualizar</Button>
+                <Button
+                  variant="outline"
+                  onClick={() => router.push(`/funcionarios/${f.id}`)}
+                >
+                  Visualizar
+                </Button>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+        <DialogContent className="w-[95%] sm:max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl">
+          <DialogHeader className="text-center sm:text-left">
+            <DialogTitle className="text-lg sm:text-xl font-semibold">
+              Novo Funcionário
+            </DialogTitle>
+          </DialogHeader>
+
+          <FuncionarioForm
+            onSubmit={handleSubmit}
+            onCancel={() => setModalOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

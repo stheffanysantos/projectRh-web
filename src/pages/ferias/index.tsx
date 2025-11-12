@@ -65,9 +65,11 @@ export default function FeriasPage() {
       />
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{editing ? "Editar Férias" : "Nova Férias"}</DialogTitle>
+        <DialogContent className="w-[95%] sm:max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl">
+          <DialogHeader className="text-center sm:text-left">
+            <DialogTitle className="text-lg sm:text-xl font-semibold">
+              {editing ? "Editar Férias" : "Nova Férias"}
+            </DialogTitle>
           </DialogHeader>
 
           <FeriasForm

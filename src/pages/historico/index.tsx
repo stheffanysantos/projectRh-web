@@ -2,6 +2,10 @@ import React, { useState, useMemo, useEffect } from "react";
 import { Button } from "../../components/ui/button";
 import HistoricoTable from "../../components/historico/HistoricoTable";
 import { HistoricoFilters } from "../../components/historico/HistoricoFilters";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 type Alteracao = {
   dataHora: string;
@@ -23,7 +27,7 @@ export default function HistoricoPage() {
       .then((data) => {
         const formatted = data.map((item: any) => ({
           dataHora: item.dataHora,
-          funcionario: item.funcionarioNome, // mapeia o campo do backend
+          funcionario: item.funcionarioNome,
           campoAlterado: item.campoAlterado,
           valorAntigo: item.valorAntigo,
           valorNovo: item.valorNovo,
@@ -43,17 +47,56 @@ export default function HistoricoPage() {
     );
   }, [historico, funcionario, campo]);
 
+  // 📄 Exportar PDF
   function exportPDF() {
-    alert("Exportar PDF ainda não implementado!");
+    const doc = new jsPDF();
+    doc.text("Histórico de Alterações", 14, 15);
+
+    autoTable(doc, {
+      startY: 25,
+      head: [["Data/Hora", "Funcionário", "Campo Alterado", "Valor Antigo", "Valor Novo"]],
+      body: dataFiltrada.map((item) => [
+        item.dataHora,
+        item.funcionario,
+        item.campoAlterado,
+        item.valorAntigo,
+        item.valorNovo,
+      ]),
+      styles: { fontSize: 9 },
+    });
+
+    doc.save("historico.pdf");
+  }
+
+  // 📊 Exportar Excel
+  function exportXLSX() {
+    const worksheet = XLSX.utils.json_to_sheet(dataFiltrada);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Histórico");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    const blob = new Blob([excelBuffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    saveAs(blob, "historico.xlsx");
   }
 
   return (
-    <div className="max-w-5xl mx-auto mt-10">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Histórico de Alterações</h1>
-        <Button variant="outline" onClick={exportPDF}>
-          Exportar PDF
-        </Button>
+    <div className="w-full p-6">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-3">
+        <h1 className="text-2xl font-semibold">Histórico de Alterações</h1>
+        <div className="flex flex-wrap gap-3">
+          <Button variant="outline" onClick={exportPDF}>
+            Exportar PDF
+          </Button>
+          <Button variant="outline" onClick={exportXLSX}>
+            Exportar XLSX
+          </Button>
+        </div>
       </div>
 
       <HistoricoFilters

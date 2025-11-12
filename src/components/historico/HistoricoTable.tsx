@@ -23,15 +23,26 @@ export default function HistoricoTable({ data }: HistoricoTableProps) {
         </tr>
       </thead>
       <tbody>
-        {data.map((item, idx) => (
-          <tr key={idx}>
-            <td className="border p-2">{item.dataHora}</td>
-            <td className="border p-2">{item.funcionario}</td>
-            <td className="border p-2">{item.campoAlterado}</td>
-            <td className="border p-2">{item.valorAntigo}</td>
-            <td className="border p-2">{item.valorNovo}</td>
+        {data.length === 0 ? (
+          <tr>
+            <td
+              colSpan={5}
+              className="border p-4 text-center text-gray-500 italic"
+            >
+              Nenhuma alteração implementada
+            </td>
           </tr>
-        ))}
+        ) : (
+          data.map((item, idx) => (
+            <tr key={idx}>
+              <td className="border p-2">{item.dataHora}</td>
+              <td className="border p-2">{item.funcionario}</td>
+              <td className="border p-2">{item.campoAlterado}</td>
+              <td className="border p-2">{item.valorAntigo}</td>
+              <td className="border p-2">{item.valorNovo}</td>
+            </tr>
+          ))
+        )}
       </tbody>
     </table>
   );
