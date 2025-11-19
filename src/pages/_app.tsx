@@ -5,10 +5,11 @@ import { Toaster } from "sonner";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <>
+    <div className="flex min-h-screen">
       <Navbar />
-      <Component {...pageProps} />
-      <Toaster richColors position="top-right" /> 
-    </>
+      <main className="flex-1">
+        <Component {...pageProps} />
+      </main>
+    </div>
   );
 }
