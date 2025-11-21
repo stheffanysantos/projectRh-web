@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Users, Clock, Umbrella } from "lucide-react";
+import { Users, Clock, Umbrella, Fingerprint, ListChecks } from "lucide-react";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -11,6 +11,8 @@ export default function Sidebar() {
     { label: "Funcionários", href: "/funcionarios", icon: <Users size={18} /> },
     { label: "Histórico", href: "/historico", icon: <Clock size={18} /> },
     { label: "Férias", href: "/ferias", icon: <Umbrella size={18} /> },
+    { label: "Ponto", href: "/ponto", icon: <Fingerprint size={18} /> },
+    { label: "Historico de ponto", href: "/historico-ponto", icon: < ListChecks size={18} /> },
   ];
 
   return (
