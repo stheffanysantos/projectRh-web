@@ -12,7 +12,6 @@ export default function Sidebar() {
     { label: "Histórico", href: "/historico", icon: <Clock size={18} /> },
     { label: "Férias", href: "/ferias", icon: <Umbrella size={18} /> },
     { label: "Ponto", href: "/ponto", icon: <Fingerprint size={18} /> },
-    { label: "Historico de ponto", href: "/historico-ponto", icon: < ListChecks size={18} /> },
   ];
 
   return (

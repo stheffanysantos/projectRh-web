@@ -16,19 +16,31 @@ export default function HistoricoPonto() {
   const [contagens, setContagens] = useState<Record<string, number>>({});
   const [dialogAberto, setDialogAberto] = useState(false);
 
+  // 🔹 Buscar funcionários ao carregar a página
   useEffect(() => {
-    setFuncionarios([
-      { id: "1", nome: "João Silva" },
-      { id: "2", nome: "Maria Souza" },
-      { id: "3", nome: "Stheffany Santos" },
-    ]);
+    async function carregarFuncionarios() {
+      try {
+        const res = await fetch("https://stheffany-backend.df8lqa.easypanel.host/funcionarios");
+        if (!res.ok) throw new Error("Erro ao carregar funcionários");
+        const data = await res.json();
+        setFuncionarios(data);
+      } catch (error) {
+        console.error(error);
+        toast.error("Falha ao carregar funcionários");
+      }
+    }
 
-    setTimeout(() => {
-      funcionarios.forEach((func) => carregarContagem(func.id));
-    }, 100);
+    carregarFuncionarios();
   }, []);
 
-  // 🔹 Função para buscar quantidade de pontos
+  // 🔹 Após carregar funcionários, buscar contagem de ponto individualmente
+  useEffect(() => {
+    if (funcionarios.length > 0) {
+      funcionarios.forEach((func) => carregarContagem(func.id));
+    }
+  }, [funcionarios]);
+
+  // 🔹 Função para buscar quantidade de pontos por funcionário
   const carregarContagem = async (id: string) => {
     try {
       const response = await fetch(`https://stheffany-backend.df8lqa.easypanel.host/pontos/funcionario/${id}/contagem`);
@@ -40,7 +52,7 @@ export default function HistoricoPonto() {
     }
   };
 
-  // 🔹 Abrir modal e buscar pontos do funcionário
+  // 🔹 Abrir modal e buscar histórico de pontos
   const abrirHistorico = async (func: any) => {
     setFuncionarioSelecionado(func);
     setDialogAberto(true);
@@ -48,20 +60,24 @@ export default function HistoricoPonto() {
     try {
       const response = await fetch(`https://stheffany-backend.df8lqa.easypanel.host/pontos/funcionario/${func.id}`);
       if (!response.ok) throw new Error("Erro ao carregar histórico");
+
       const data = await response.json();
-      // Converter string de data para objeto Date
-      setPontos(data.map((p: any) => ({ ...p, dataHora: new Date(p.dataHora) })));
+      setPontos(
+        data.map((p: any) => ({ ...p, dataHora: new Date(p.dataHora) })) // Converte data
+      );
+      console.log(data);
     } catch (error) {
       toast.error("Erro ao carregar histórico do ponto");
     }
   };
 
+  // 🔹 Função para definir status (Normal, Atrasado, Hora Extra)
   const getStatus = (data: Date, index: number, registros: any[]) => {
     const primeira = registros[0];
     const ultima = registros[registros.length - 1];
 
-    if (data === primeira.dataHora && data.getHours() > 8) return "Atrasado";
-    if (data === ultima.dataHora && data.getHours() > 18) return "Hora Extra";
+    if (data.getTime() === primeira.dataHora.getTime() && data.getHours() > 8) return "Atrasado";
+    if (data.getTime() === ultima.dataHora.getTime() && data.getHours() > 18) return "Hora Extra";
     return "Normal";
   };
 
@@ -91,6 +107,7 @@ export default function HistoricoPonto() {
         ))}
       </div>
 
+      {/* 🔹 Modal do histórico */}
       {funcionarioSelecionado && (
         <Dialog open={dialogAberto} onOpenChange={setDialogAberto}>
           <DialogContent className="max-w-2xl">
